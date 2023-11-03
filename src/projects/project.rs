@@ -29,7 +29,8 @@ pub struct ProjectInfo {
     pub branches: Option<HashMap<String, String>>,
     pub labels: Option<HashMap<String, LabelTypeInfo>>,
     pub web_links: Option<Vec<WebLinkInfo>>,
-    pub _more_projects: Option<bool>,
+    #[serde(rename(deserialize = "_more_projects"))]
+    pub more_projects: Option<bool>,
 }
 
 pub enum ProjectType {
@@ -101,7 +102,7 @@ impl ListProjectsBuilder {
     }
 
     pub fn with_skip(mut self, value: u32) -> Self {
-        self.limit = Some(value);
+        self.skip = Some(value);
         self
     }
 
@@ -128,7 +129,7 @@ impl ListProjectsBuilder {
         }
 
         if let Some(true) = &self.include_description {
-            url = format!("{}d&", url);
+            url = format!("{}d=&", url);
         }
 
         if let Some(n) = &self.limit {
@@ -148,7 +149,7 @@ impl ListProjectsBuilder {
         }
 
         if let Some(true) = &self.tree {
-            url = format!("{}t&", url);
+            url = format!("{}t=&", url);
         }
 
         if let Some(t) = &self.project_type {
@@ -161,14 +162,14 @@ impl ListProjectsBuilder {
 
         if let Some(f) = &self.filter {
             url = match f {
-                ProjectFilter::All => format!("{}all&", url),
-                ProjectFilter::State(ProjectState::Active) => format!("{}state=ACTIVE", url),
-                ProjectFilter::State(ProjectState::Hidden) => format!("{}state=HIDDEN", url),
-                ProjectFilter::State(ProjectState::ReadOnly) => format!("{}state=READ_ONLY", url),
+                ProjectFilter::All => format!("{}all=&", url),
+                ProjectFilter::State(ProjectState::Active) => format!("{}state=ACTIVE&", url),
+                ProjectFilter::State(ProjectState::Hidden) => format!("{}state=HIDDEN&", url),
+                ProjectFilter::State(ProjectState::ReadOnly) => format!("{}state=READ_ONLY&", url),
             }
         }
 
-        url = url.trim_end_matches('&').to_string();
+        url = url.trim_end_matches(&['?', '&']).to_string();
 
         client.query(url).await
     }
