@@ -1,7 +1,6 @@
-use reqwest::StatusCode;
 use serde::Deserialize;
 
-use crate::GerritClient;
+use crate::{GerritClient, client::GerritError};
 
 #[derive(Debug, Deserialize)]
 pub struct DocResult {
@@ -14,22 +13,11 @@ pub struct SearchBuilder {
 }
 
 impl SearchBuilder {
-    pub async fn execute(&self, api: &GerritClient) -> Result<Vec<DocResult>, StatusCode> {
-        let result = api.get(format!("Documentation/?q={}", self.query)).send().await;
-
-        match result {
-            Ok(response) if response.status() == StatusCode::OK => {
-                match response.text().await {
-                    Ok(v) => serde_json::from_str::<Vec<DocResult>>(&v[4..]).map_err(|_| StatusCode::BAD_REQUEST),
-                    Err(_) => Err(StatusCode::BAD_REQUEST),
-                }
-            },
-            Ok(response) => Err(response.status()),
-            Err(e) => Err(e.status().unwrap_or(StatusCode::BAD_REQUEST)),
-        }
+    pub async fn execute(&self, client: &GerritClient) -> Result<Vec<DocResult>, GerritError> {
+        client.query(format!("Documentation/?q={}", self.query)).await
     }
 }
 
-pub fn search<'a>(query: String) -> SearchBuilder {
+pub fn search(query: String) -> SearchBuilder {
     SearchBuilder { query }
 }
