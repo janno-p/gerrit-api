@@ -3,6 +3,29 @@ name = "gerrit-api"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+serde_json = "1.0.108"
+
+[dependencies.reqwest]
+version = "0.11.22"
+default-features = false
+features = [
+    "json",
+    "rustls-tls"
+]
+
+[dependencies.serde]
+version = "1.0.190"
+features = [
+    "derive"
+]
+
+[dependencies.tokio]
+version = "1.33.0"
+features = [
+    "macros",
+    "rt-multi-thread"
+]
+
+[dev-dependencies]
+dotenv = "0.15.0"
