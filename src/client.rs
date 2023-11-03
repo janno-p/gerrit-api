@@ -44,7 +44,7 @@ impl GerritClient {
                     if let Some("application/json") = content_type.split(";").next() {
                         let text = response.text().await;
                         match text {
-                            Ok(json_string) => serde_json::from_str(&json_string[4..]).map_err(|_| GerritError::InvalidJson),
+                            Ok(json_string) => serde_json::from_str(&json_string[4..]).map_err(|e| { println!("{}", json_string); println!("{}", e); GerritError::InvalidJson }),
                             Err(_) => Err(GerritError::InvalidJson),
                         }
                     } else {

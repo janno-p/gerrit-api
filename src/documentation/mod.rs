@@ -1,12 +1,8 @@
-use serde::Deserialize;
+mod types;
+
+pub use types::*;
 
 use crate::{GerritClient, client::GerritError};
-
-#[derive(Debug, Deserialize)]
-pub struct DocResult {
-    pub title: String,
-    pub url: String,
-}
 
 pub struct SearchBuilder {
     pub(crate) query: String,

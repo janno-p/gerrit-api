@@ -1,4 +1,4 @@
-mod access;
+pub mod access;
 mod accounts;
 mod changes;
 mod client;

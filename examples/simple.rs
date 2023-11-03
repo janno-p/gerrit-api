@@ -1,7 +1,7 @@
 use std::env;
 
 use dotenv::dotenv;
-use gerrit_api::{documentation, GerritClient, projects};
+use gerrit_api::{documentation, GerritClient, projects, access};
 
 #[tokio::main]
 pub async fn main() {
@@ -34,4 +34,10 @@ pub async fn main() {
         .execute(&client)
         .await;
     println!("Response #4: {:?}", result);
+
+    let result = access::list_access_rights()
+        .of_project("Kinnistusraamat".into())
+        .execute(&client)
+        .await;
+    println!("Response #5: {:?}", result);
 }
