@@ -1,7 +1,7 @@
 use std::env;
 
 use dotenv::dotenv;
-use gerrit_api::{documentation, GerritClient, projects, access};
+use gerrit_api::{documentation, GerritClient, access, projects};
 
 #[tokio::main]
 pub async fn main() {
@@ -12,32 +12,63 @@ pub async fn main() {
 
     let client = GerritClient::new(base_url, account_token);
 
-    let result = documentation::search("test".into())
-        .execute(&client)
-        .await;
-    println!("Response #1: {:?}", result);
+    access_list_access_rights(&client).await;
+    documentation_search(&client).await;
+    projects_get_submit_requirement(&client).await;
+    projects_list_submit_requirements(&client).await;
+    projects_list_projects(&client).await;
+}
 
-    let result = projects::submit_requirements::get("Kinnistusraamat".into(), "Code-Review".into())
-        .execute(&client)
-        .await;
-    println!("Response #2: {:?}", result);
-
-    let result = projects::submit_requirements::list("Kinnistusraamat%2Fkris5".into())
-        .execute(&client)
-        .await;
-    println!("Response #3: {:?}", result);
-
-    let result = projects::project::list()
-        .with_description()
-        .with_limit(10)
-        .with_skip(30)
-        .execute(&client)
-        .await;
-    println!("Response #4: {:?}", result);
+async fn access_list_access_rights(client: &GerritClient) {
+    println!("[ACCESS] LIST_ACCESS_RIGHTS");
 
     let result = access::list_access_rights()
         .of_project("Kinnistusraamat".into())
         .execute(&client)
         .await;
-    println!("Response #5: {:?}", result);
+
+    println!("Response: {:?}", result);
+}
+
+async fn documentation_search(client: &GerritClient) {
+    println!("[DOCUMENTATION] search");
+
+    let result = documentation::search("test".into())
+        .execute(&client)
+        .await;
+
+    println!("Response: {:?}", result);
+}
+
+async fn projects_get_submit_requirement(client: &GerritClient) {
+    println!("[PROJECTS] GET_SUBMIT_REQUIREMENT");
+
+    let result = projects::get_submit_requirement("Kinnistusraamat".into(), "Code-Review".into())
+        .execute(&client)
+        .await;
+
+    println!("Response: {:?}", result);
+}
+
+async fn projects_list_submit_requirements(client: &GerritClient) {
+    println!("[PROJECTS] LIST_SUBMIT_REQUIREMENTS");
+
+    let result = projects::list_submit_requirements("Kinnistusraamat%2Fkris5".into())
+        .execute(&client)
+        .await;
+
+    println!("Response: {:?}", result);
+}
+
+async fn projects_list_projects(client: &GerritClient) {
+    println!("[PROJECTS] LIST_PROJECTS");
+
+    let result = projects::list_projects()
+        .with_description()
+        .with_limit(10)
+        .with_skip(30)
+        .execute(&client)
+        .await;
+
+    println!("Response: {:?}", result);
 }

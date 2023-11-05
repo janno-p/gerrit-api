@@ -4,50 +4,46 @@ use crate::{GerritClient, client::GerritError};
 
 use super::ProjectInfo;
 
+pub enum ProjectName {
+    Prefix(String),
+    Regex(String),
+    Substring(String),
+}
+
+pub enum ProjectStatus {
+    All,
+    Active,
+    ReadOnly,
+    Hidden,
+}
+
 pub enum ProjectType {
     All,
     Code,
     Permissions,
 }
 
-pub enum ProjectState {
-    Active,
-    ReadOnly,
-    Hidden,
-}
-
-pub enum ProjectFilter {
-    All,
-    State(ProjectState),
-}
-
-pub enum ProjectMatch {
-    Prefix(String),
-    Regex(String),
-    Substring(String),
-}
-
 pub struct ListProjectsBuilder {
     branch: Option<String>,
     include_description: Option<bool>,
     limit: Option<u32>,
-    project_match: Option<ProjectMatch>,
+    name: Option<ProjectName>,
     skip: Option<u32>,
     tree: Option<bool>,
-    project_type: Option<ProjectType>,
-    filter: Option<ProjectFilter>,
+    r#type: Option<ProjectType>,
+    status: Option<ProjectStatus>,
 }
 
-pub fn list() -> ListProjectsBuilder {
+pub fn list_projects() -> ListProjectsBuilder {
     ListProjectsBuilder {
         branch: None,
         include_description: None,
         limit: None,
-        project_match: None,
+        name: None,
         skip: None,
         tree: None,
-        project_type: None,
-        filter: None
+        r#type: None,
+        status: None
     }
 }
 
@@ -67,8 +63,8 @@ impl ListProjectsBuilder {
         self
     }
 
-    pub fn with_match(mut self, value: ProjectMatch) -> Self {
-        self.project_match = Some(value);
+    pub fn with_name_filter(mut self, value: ProjectName) -> Self {
+        self.name = Some(value);
         self
     }
 
@@ -83,12 +79,12 @@ impl ListProjectsBuilder {
     }
 
     pub fn with_type(mut self, value: ProjectType) -> Self {
-        self.project_type = Some(value);
+        self.r#type = Some(value);
         self
     }
 
-    pub fn with_filter(mut self, value: ProjectFilter) -> Self {
-        self.filter = Some(value);
+    pub fn with_status(mut self, value: ProjectStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
@@ -107,11 +103,11 @@ impl ListProjectsBuilder {
             url = format!("{}n={}&", url, n);
         }
 
-        if let Some(m) = &self.project_match {
+        if let Some(m) = &self.name {
             url = match m {
-                ProjectMatch::Prefix(p) => format!("{}p={}&", url, p),
-                ProjectMatch::Regex(r) => format!("{}r={}&", url, r),
-                ProjectMatch::Substring(s) => format!("{}m={}&", url, s),
+                ProjectName::Prefix(p) => format!("{}p={}&", url, p),
+                ProjectName::Regex(r) => format!("{}r={}&", url, r),
+                ProjectName::Substring(s) => format!("{}m={}&", url, s),
             }
         }
 
@@ -123,7 +119,7 @@ impl ListProjectsBuilder {
             url = format!("{}t=&", url);
         }
 
-        if let Some(t) = &self.project_type {
+        if let Some(t) = &self.r#type {
             url = match t {
                 ProjectType::All => format!("{}type=ALL&", url),
                 ProjectType::Code => format!("{}type=CODE&", url),
@@ -131,12 +127,12 @@ impl ListProjectsBuilder {
             }
         }
 
-        if let Some(f) = &self.filter {
+        if let Some(f) = &self.status {
             url = match f {
-                ProjectFilter::All => format!("{}all=&", url),
-                ProjectFilter::State(ProjectState::Active) => format!("{}state=ACTIVE&", url),
-                ProjectFilter::State(ProjectState::Hidden) => format!("{}state=HIDDEN&", url),
-                ProjectFilter::State(ProjectState::ReadOnly) => format!("{}state=READ_ONLY&", url),
+                ProjectStatus::All => format!("{}all=&", url),
+                ProjectStatus::Active => format!("{}state=ACTIVE&", url),
+                ProjectStatus::Hidden => format!("{}state=HIDDEN&", url),
+                ProjectStatus::ReadOnly => format!("{}state=READ_ONLY&", url),
             }
         }
 

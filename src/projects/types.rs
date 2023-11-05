@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
-use indexmap::IndexMap;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct LabelTypeInfo {
-    pub values: IndexMap<String, String>,
+    pub values: HashMap<String, String>,
     pub default_value: usize,
 }
 
@@ -29,4 +28,14 @@ pub struct ProjectInfo {
     pub web_links: Option<Vec<WebLinkInfo>>,
     #[serde(rename(deserialize = "_more_projects"))]
     pub more_projects: Option<bool>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SubmitRequirementInfo {
+    pub name: String,
+    pub description: Option<String>,
+    pub applicability_expression: Option<String>,
+    pub submittability_expression: String,
+    pub override_expression: Option<String>,
+    pub allow_override_in_child_projects: bool,
 }
