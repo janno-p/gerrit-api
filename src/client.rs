@@ -1,5 +1,5 @@
-use reqwest::{Client, StatusCode};
-use serde::de;
+use reqwest::{Client, StatusCode, Response, Error};
+use serde::{de, ser};
 
 pub struct GerritClient {
     http_client: Client,
@@ -28,8 +28,6 @@ impl GerritClient {
     where
         T: de::DeserializeOwned,
     {
-        println!("==> {}/{}", self.base_url, url);
-
         let result = self
             .http_client
             .get(format!("{}/{}", self.base_url, url))
@@ -37,23 +35,41 @@ impl GerritClient {
             .send()
             .await;
 
+        parse_response(result, StatusCode::OK).await
+    }
+
+    pub(crate) async fn execute<B, T>(&self, url: String, value: &B) -> Result<T, GerritError>
+    where
+        B: ser::Serialize,
+        T: de::DeserializeOwned,
+    {
+        let result = self
+            .http_client
+            .put(format!("{}/{}", self.base_url, url))
+            .header("Cookie", format!("GerritAccount={}", &self.account_token))
+            .header("Content-Type", "application/json; charset=UTF-8")
+            .json(&value)
+            .send()
+            .await;
+
+        parse_response(result, StatusCode::CREATED).await
+    }
+
+    pub(crate) async fn delete<B>(&self, url: String, value: &B) -> Result<(), GerritError>
+    where
+        B: ser::Serialize
+    {
+        let result = self
+            .http_client
+            .put(format!("{}/{}", self.base_url, url))
+            .header("Cookie", format!("GerritAccount={}", &self.account_token))
+            .header("Content-Type", "application/json; charset=UTF-8")
+            .json(&value)
+            .send()
+            .await;
+
         match result {
-            Ok(response) if response.status() == StatusCode::OK => {
-                if let Some(content_type) = response.headers().get("content-type") {
-                    let content_type = String::from_utf8(content_type.as_bytes().to_vec()).unwrap_or_default();
-                    if let Some("application/json") = content_type.split(";").next() {
-                        let text = response.text().await;
-                        match text {
-                            Ok(json_string) => serde_json::from_str(&json_string[4..]).map_err(|e| { println!("{}", json_string); println!("{}", e); GerritError::InvalidJson }),
-                            Err(_) => Err(GerritError::InvalidJson),
-                        }
-                    } else {
-                        Err(GerritError::InvalidContentType(content_type))
-                    }
-                } else {
-                    Err(GerritError::InvalidContentType("".to_string()))
-                }
-            },
+            Ok(response) if response.status() == StatusCode::NO_CONTENT => Ok(()),
             Ok(response) => Err(GerritError::InvalidStatusCode(response.status())),
             Err(err) => {
                 err.status()
@@ -61,5 +77,35 @@ impl GerritClient {
                 .unwrap_or(Err(GerritError::InvalidRequest(err)))
             },
         }
+    }
+}
+
+async fn parse_response<T>(result: Result<Response, Error>, success_status_code: StatusCode) -> Result<T, GerritError>
+where
+    T: de::DeserializeOwned,
+{
+    match result {
+        Ok(response) if response.status() == success_status_code => {
+            if let Some(content_type) = response.headers().get("content-type") {
+                let content_type = String::from_utf8(content_type.as_bytes().to_vec()).unwrap_or_default();
+                if let Some("application/json") = content_type.split(";").next() {
+                    let text = response.text().await;
+                    match text {
+                        Ok(json_string) => serde_json::from_str(&json_string[4..]).map_err(|e| { println!("{}", json_string); println!("{}", e); GerritError::InvalidJson }),
+                        Err(_) => Err(GerritError::InvalidJson),
+                    }
+                } else {
+                    Err(GerritError::InvalidContentType(content_type))
+                }
+            } else {
+                Err(GerritError::InvalidContentType("".to_string()))
+            }
+        },
+        Ok(response) => Err(GerritError::InvalidStatusCode(response.status())),
+        Err(err) => {
+            err.status()
+            .map(|status_code| Err(GerritError::InvalidStatusCode(status_code)))
+            .unwrap_or(Err(GerritError::InvalidRequest(err)))
+        },
     }
 }

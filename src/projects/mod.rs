@@ -1,12 +1,12 @@
-mod list_projects;
+mod dashboards;
+mod submit_requirements;
 
-mod get_submit_requirement;
-mod list_submit_requirements;
+mod list_projects;
 
 mod types;
 
-pub use get_submit_requirement::*;
-pub use list_submit_requirements::*;
+pub use dashboards::*;
+pub use submit_requirements::*;
 
 pub use list_projects::*;
 
