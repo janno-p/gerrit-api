@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{GerritClient, client::GerritError};
+use crate::{client::GerritError, GerritClient};
 
 use super::ProjectInfo;
 
@@ -43,7 +43,7 @@ pub fn list_projects() -> ListProjectsBuilder {
         skip: None,
         tree: None,
         r#type: None,
-        status: None
+        status: None,
     }
 }
 
@@ -88,7 +88,10 @@ impl ListProjectsBuilder {
         self
     }
 
-    pub async fn execute(&self, client: &GerritClient) -> Result<HashMap<String, ProjectInfo>, GerritError> {
+    pub async fn execute(
+        &self,
+        client: &GerritClient,
+    ) -> Result<HashMap<String, ProjectInfo>, GerritError> {
         let mut url = "projects/?".to_string();
 
         if let Some(b) = &self.branch {

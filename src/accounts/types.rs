@@ -4,7 +4,7 @@ use serde::Deserialize;
 pub struct AvatarInfo {
     pub url: String,
     pub height: u32,
-    pub width: u32
+    pub width: u32,
 }
 
 #[derive(Debug, Deserialize)]

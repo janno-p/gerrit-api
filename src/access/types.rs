@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use serde::Deserialize;
 
-use crate::{groups::GroupInfo, projects::{WebLinkInfo, ProjectInfo}};
+use crate::{
+    groups::GroupInfo,
+    projects::{ProjectInfo, WebLinkInfo},
+};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all(deserialize = "UPPERCASE"))]

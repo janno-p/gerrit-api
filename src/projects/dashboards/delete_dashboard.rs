@@ -1,4 +1,4 @@
-use crate::{GerritClient, client::GerritError};
+use crate::{client::GerritError, GerritClient};
 
 use super::DashboardInput;
 
@@ -11,7 +11,11 @@ pub struct DeleteDashboardBuilder {
 /// Deletes a project dashboard.
 /// Currently only supported for the `default` dashboard.
 pub fn delete_dashboard(project_name: String, dashboard_id: String) -> DeleteDashboardBuilder {
-    DeleteDashboardBuilder { project_name, dashboard_id, dashboard_input: None }
+    DeleteDashboardBuilder {
+        project_name,
+        dashboard_id,
+        dashboard_input: None,
+    }
 }
 
 impl DeleteDashboardBuilder {
@@ -21,6 +25,14 @@ impl DeleteDashboardBuilder {
     }
 
     pub async fn execute(&self, client: &GerritClient) -> Result<(), GerritError> {
-        client.delete(format!("projects/{}/dashboards/{}", self.project_name, self.dashboard_id), &self.dashboard_input).await
+        client
+            .delete(
+                format!(
+                    "projects/{}/dashboards/{}",
+                    self.project_name, self.dashboard_id
+                ),
+                &self.dashboard_input,
+            )
+            .await
     }
 }

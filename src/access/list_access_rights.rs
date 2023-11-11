@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{GerritClient, client::GerritError};
+use crate::{client::GerritError, GerritClient};
 
 use super::ProjectAccessInfo;
 
@@ -9,7 +9,9 @@ pub struct ListAccessRightsBuilder {
 }
 
 pub fn list_access_rights() -> ListAccessRightsBuilder {
-    ListAccessRightsBuilder { projects: Vec::new() }
+    ListAccessRightsBuilder {
+        projects: Vec::new(),
+    }
 }
 
 impl ListAccessRightsBuilder {
@@ -18,10 +20,18 @@ impl ListAccessRightsBuilder {
         self
     }
 
-    pub async fn execute(&self, client: &GerritClient) -> Result<HashMap<String, ProjectAccessInfo>, GerritError> {
-        let url = self.projects.iter()
-            .fold("access/?".to_string(), |acc, p| format!("{}project={}&", acc, p))
-            .trim_end_matches(&['?', '&']).to_string();
+    pub async fn execute(
+        &self,
+        client: &GerritClient,
+    ) -> Result<HashMap<String, ProjectAccessInfo>, GerritError> {
+        let url = self
+            .projects
+            .iter()
+            .fold("access/?".to_string(), |acc, p| {
+                format!("{}project={}&", acc, p)
+            })
+            .trim_end_matches(&['?', '&'])
+            .to_string();
 
         client.query(url).await
     }

@@ -1,7 +1,7 @@
 use std::env;
 
 use dotenv::dotenv;
-use gerrit_api::{documentation, GerritClient, access, projects};
+use gerrit_api::{access, documentation, projects, GerritClient};
 
 #[tokio::main]
 pub async fn main() {
@@ -33,9 +33,7 @@ async fn access_list_access_rights(client: &GerritClient) {
 async fn documentation_search(client: &GerritClient) {
     println!("[DOCUMENTATION] search");
 
-    let result = documentation::search("test".into())
-        .execute(&client)
-        .await;
+    let result = documentation::search("test".into()).execute(&client).await;
 
     println!("Response: {:?}", result);
 }

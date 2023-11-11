@@ -1,4 +1,4 @@
-use crate::{GerritClient, client::GerritError};
+use crate::{client::GerritError, GerritClient};
 
 use super::DashboardInfo;
 
@@ -13,6 +13,8 @@ pub fn list_dashboards(project_name: String) -> ListDashboardsBuilder {
 
 impl ListDashboardsBuilder {
     pub async fn execute(&self, client: &GerritClient) -> Result<Vec<DashboardInfo>, GerritError> {
-        client.query(format!("projects/{}/dashboards/", self.project_name)).await
+        client
+            .query(format!("projects/{}/dashboards/", self.project_name))
+            .await
     }
 }

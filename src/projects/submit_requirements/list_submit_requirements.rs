@@ -1,4 +1,4 @@
-use crate::{GerritClient, client::GerritError};
+use crate::{client::GerritError, GerritClient};
 
 use super::SubmitRequirementInfo;
 
@@ -11,7 +11,15 @@ pub fn list_submit_requirements(project_name: String) -> ListSubmitRequirementsB
 }
 
 impl ListSubmitRequirementsBuilder {
-    pub async fn execute(&self, client: &GerritClient) -> Result<Vec<SubmitRequirementInfo>, GerritError> {
-        client.query(format!("projects/{}/submit_requirements", self.project_name)).await
+    pub async fn execute(
+        &self,
+        client: &GerritClient,
+    ) -> Result<Vec<SubmitRequirementInfo>, GerritError> {
+        client
+            .query(format!(
+                "projects/{}/submit_requirements",
+                self.project_name
+            ))
+            .await
     }
 }

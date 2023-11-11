@@ -1,5 +1,4 @@
-
-use crate::{GerritClient, client::GerritError};
+use crate::{client::GerritError, GerritClient};
 
 use super::DocResult;
 
@@ -9,7 +8,9 @@ pub struct SearchBuilder {
 
 impl SearchBuilder {
     pub async fn execute(&self, client: &GerritClient) -> Result<Vec<DocResult>, GerritError> {
-        client.query(format!("Documentation/?q={}", self.query)).await
+        client
+            .query(format!("Documentation/?q={}", self.query))
+            .await
     }
 }
 
