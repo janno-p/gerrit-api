@@ -55,18 +55,23 @@ impl GerritClient {
         parse_response(result, StatusCode::CREATED).await
     }
 
-    pub(crate) async fn delete<B>(&self, url: String, value: &B) -> Result<(), GerritError>
+    pub(crate) async fn delete<B>(&self, url: String, value: &Option<B>) -> Result<(), GerritError>
     where
         B: ser::Serialize
     {
-        let result = self
+        let builder = self
             .http_client
-            .put(format!("{}/{}", self.base_url, url))
+            .delete(format!("{}/{}", self.base_url, url))
             .header("Cookie", format!("GerritAccount={}", &self.account_token))
-            .header("Content-Type", "application/json; charset=UTF-8")
-            .json(&value)
-            .send()
-            .await;
+            .header("Content-Type", "application/json; charset=UTF-8");
+
+        let builder = if let Some(value) = value {
+            builder.json(&value)
+        } else {
+            builder
+        };
+
+        let result = builder.send().await;
 
         match result {
             Ok(response) if response.status() == StatusCode::NO_CONTENT => Ok(()),
