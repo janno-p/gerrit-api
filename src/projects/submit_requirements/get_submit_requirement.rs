@@ -7,6 +7,8 @@ pub struct GetSubmitRequirementBuilder {
     submit_requirement_name: String,
 }
 
+/// Retrieves the definition of a submit requirement that is defined in this project.
+/// The calling user must have read access to the `refs/meta/config` branch of the project.
 pub fn get_submit_requirement(
     project_name: String,
     submit_requirement_name: String,

@@ -2,20 +2,20 @@ use crate::{client::GerritError, GerritClient};
 
 use super::{SubmitRequirementInfo, SubmitRequirementInput};
 
-pub struct CreateSubmitRequirementBuilder {
+pub struct UpdateSubmitRequirementBuilder {
     project_name: String,
     submit_requirement_input: SubmitRequirementInput,
 }
 
-/// Creates a new submit requirement definition in this project.
+/// Updates the definition of a submit requirement that is defined in this project.
 /// The calling user must have write access to the `refs/meta/config` branch of the project.
-/// If a submit requirement with this name is already defined in this project,
-/// this submit requirement definition is updated (see `update_submit_requirement`).
-pub fn create_submit_requirement(
+/// The new submit requirement will overwrite the existing submit requirement. That is,
+/// unspecified attributes will be set to their defaults.
+pub fn update_submit_requirement(
     project_name: String,
     submit_requirement_name: String,
-) -> CreateSubmitRequirementBuilder {
-    CreateSubmitRequirementBuilder {
+) -> UpdateSubmitRequirementBuilder {
+    UpdateSubmitRequirementBuilder {
         project_name,
         submit_requirement_input: SubmitRequirementInput {
             name: submit_requirement_name,
@@ -28,7 +28,7 @@ pub fn create_submit_requirement(
     }
 }
 
-impl CreateSubmitRequirementBuilder {
+impl UpdateSubmitRequirementBuilder {
     pub async fn execute(
         &self,
         client: &GerritClient,
